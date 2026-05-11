@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Погода Тула</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top left, rgba(99,102,241,0.25), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,0.2), transparent 30%),
+        linear-gradient(135deg, #0f172a, #1e293b 60%, #334155);
+    color:white;
+    padding:40px 20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:0 auto;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.header h1{
+    font-size:42px;
+    font-weight:700;
+    margin-bottom:10px;
+    letter-spacing:-1px;
+}
+
+.header p{
+    color:rgba(255,255,255,0.75);
+    font-size:16px;
+}
+
+#loading{
+    width:fit-content;
+    margin:0 auto 30px;
+    padding:14px 24px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.12);
+    color:#e2e8f0;
+    font-weight:500;
+}
+
+#weather{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:24px;
+}
+
+.card{
+    position:relative;
+    overflow:hidden;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:24px;
+    padding:24px;
+    transition:0.3s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+.card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+    pointer-events:none;
+}
+
+.card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 18px 35px rgba(0,0,0,0.35);
+}
+
+.card h3{
+    font-size:18px;
+    margin-bottom:18px;
+    color:#f8fafc;
+}
+
+.temp{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:34px;
+    font-weight:700;
+    margin-bottom:18px;
+    color:#38bdf8;
+}
+
+.temp span{
+    font-size:18px;
+    font-weight:500;
+    color:#cbd5e1;
+}
+
+.info{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,0.12);
+    color:#e2e8f0;
+    font-size:15px;
+}
+
+.wind{
+    font-weight:600;
+    color:#f8fafc;
+}
+
+@media(max-width:600px){
+
+    body{
+        padding:24px 16px;
+    }
+
+    .header h1{
+        font-size:32px;
+    }
+
+    .temp{
+        font-size:28px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Погода в Туле</h1>
+        <p>Прогноз на ближайшую неделю</p>
+    </div>
+
+    <div id="loading">
+        Загрузка прогноза...
+    </div>
+
+    <div id="weather"></div>
+
+</div>
+
+<script>
+
+async function getWeather(){
+
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=54.1961&longitude=37.6182&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max&timezone=Europe/Moscow";
+
+    try{
+
+        const response = await fetch(url);
+
+        const data = await response.json();
+
+        console.log(data);
+
+        document.getElementById("loading").style.display = "none";
+
+        const weather = document.getElementById("weather");
+
+        for(let i = 0; i < data.daily.time.length; i++){
+
+            const card = document.createElement("div");
+
+            card.className = "card";
+
+            card.innerHTML = `
+                <h3>${data.daily.time[i]}</h3>
+
+                <div class="temp">
+                    ${data.daily.temperature_2m_max[i]}°
+                    <span>/ ${data.daily.temperature_2m_min[i]}°C</span>
+                </div>
+
+                <div class="info">
+                    <span>💨 Ветер</span>
+                    <span class="wind">
+                        ${data.daily.wind_speed_10m_max[i]} км/ч
+</span>
+                </div>
+            `;
+
+            weather.appendChild(card);
+        }
+
+    }
+    catch(error){
+
+        console.log(error);
+
+        document.getElementById("loading").innerHTML =
+        "Ошибка загрузки";
+    }
+}
+
+getWeather();
+
+</script>
+
+</body>
+</html>
